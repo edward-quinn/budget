@@ -12,6 +12,8 @@
 library(shiny)
 library(tidyverse)
 library(janitor)
+library(viridis)
+
 
 
 # Data preparation
@@ -73,57 +75,19 @@ server <- function(input, output, session) {
   
   output$expenses_plotted <- renderPlot({
     selected() |> 
-      ggplot(aes(x=category, y=Expenses)) +
+      ggplot(aes(x = fct_reorder(category, Expenses), y=Expenses,
+                 fill = fct_reorder(category, Expenses))) +
       geom_bar(stat = "identity") +
       theme_minimal() +
-      theme(axis.text.x = element_text(angle = 90)) +
-      ylim(0,1400) +
+      scale_fill_viridis(discrete = TRUE, guide = "none") +
+      ylim(0,2800) +
       xlab("Spending Category") +
-      ylab("Cost")
+      ylab("Cost") +
+      geom_text(aes(label = Expenses), hjust = -0.1, colour = "black") +
+      coord_flip()
   }, res = 96)
 }
 
 # Run App
 shinyApp(ui, server)
 
-
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-
-    # Application title
-    titlePanel("Old Faithful Geyser Data"),
-
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
-    )
-)
-
-# Define server logic required to draw a histogram
-server <- function(input, output) {
-
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
-}
-
-# Run the application 
-shinyApp(ui = ui, server = server)
