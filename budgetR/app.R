@@ -47,12 +47,11 @@ ui <- fluidPage(
   
   fluidRow(
     column(2,
-           selectInput("month", "Month", choices = months)
+           selectInput("month", "Month", choices = months, multiple = TRUE)
     )
   ),
   
   fluidRow(
-    column(4, tableOutput("expenses")),
     column(8, plotOutput("expenses_plotted"))
   )
 )
@@ -69,15 +68,12 @@ server <- function(input, output, session) {
     arrange(desc(Expenses))
   })
   
-  output$expenses <- renderTable(
-    selected() 
-  )
   
   output$expenses_plotted <- renderPlot({
     selected() |> 
       ggplot(aes(x = fct_reorder(category, Expenses), y=Expenses,
                  fill = fct_reorder(category, Expenses))) +
-      geom_bar(stat = "identity") +
+      geom_col() +
       theme_minimal() +
       scale_fill_viridis(discrete = TRUE, guide = "none") +
       ylim(0,2800) +
@@ -90,4 +86,22 @@ server <- function(input, output, session) {
 
 # Run App
 shinyApp(ui, server)
+
+
+
+
+
+# Random ideas for additions:
+
+# Projected spend for the year facet wrap plots by category, dashed lines
+# for months that have not yet occurred, solid lines for prior months.
+
+# Current total spend and budgeted total spend bullet graphs by category.
+
+# A bar graph with positive and negative values where zero is the
+# total amount budgeted.
+
+
+
+
 
