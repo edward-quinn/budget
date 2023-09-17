@@ -136,40 +136,65 @@ shinyApp(ui, server)
 # Current total spend and budgeted total spend bullet graphs by category.
 ##########################################################################
 
-ex_df <- bind_rows(
-  tibble(
-    name = rep("Ex 1", 2),
-    group = c("Qualitative", "Measure"),
-    color = c("grey", "black"),
-    value = c(100, 75),
-    width = c(0.9, 0.5),
-    target = rep(82, 2),
-    ymin = rep(0.7, 2),
-    ymax = rep(1.3, 2)
+# approximated data
+run_df <- tibble(
+  category = c(
+    "Miscellaneous",
+    "Rent",
+    "Fun",
+    "Groceries",
+    "Phone and Internet",
+    "Gym",
+    "Health Insurance",
+    "Dining Out",
+    "Home & Utilities",
+    "Gas",
+    "Amazon, Spotify, and HBO",
+    "Transport",
+    "Electricity"
   ),
-  tibble(
-    name = rep("Ex 2", 2),
-    group = c("Qualitative", "Measure"),
-    color = c("grey", "black"),
-    value = c(88, 64),
-    width = c(0.9, 0.5),
-    target = rep(77, 2),
-    ymin = rep(1.7, 2),
-    ymax = rep(2.3, 2)
+  actual = c(
+    38, 57, 63, 36, 89, 50, 39, 41, 54
+  ),
+  expected = c(
+    56, 72, 66, 39, 92, 54, 54, 57, 64
   )
-)
+) |> 
+  mutate(
+    down_distance = factor(down_distance),
+    difference = actual - expected,
+    diff_color = if_else(difference < 0, "#DC143C", "black")
+  )
 
-ex_df %>% 
-  ggplot(aes(x = value, y = name, fill = color)) +
-  geom_col(width = c(0.9, 0.5, 0.9, 0.5)) +
-  geom_linerange(
-    aes(x = target, ymin = ymin, ymax = ymax),
-    size = 2, color = "red"
+run_plot <- run_df |> 
+  ggplot(aes(x = actual, y = fct_rev(down_distance))) +
+  geom_text(
+    aes(x = 100, label = paste0(difference, "%"), color = diff_color), 
+    nudge_x = 10, hjust = 1, fontface= "bold", family = "Chivo", size = 10
   ) +
-  coord_cartesian(ylim = c(0.3, 2.7)) +
+  geom_col(aes(x = 100), width = 0.7, color = "grey", alpha = 0.2) +
+  geom_col(aes(x = expected), fill = team_colors[1], alpha = 0.5, width = 0.7) +
+  geom_col(width = 0.3, fill = team_colors[2]) + 
   scale_fill_identity() +
+  scale_x_continuous(breaks = c(25, 50, 75), labels = scales::percent_format(scale = 1)) +
   theme_minimal() +
-  theme(panel.grid.major.y = element_blank())
+  theme(
+    text = element_text(family = "Chivo"),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_line(color = "grey", size = 0.2),
+    panel.ontop = TRUE,
+    axis.text.y = element_markdown(size = 14, margin = margin(r = -25, unit = "pt")),
+    axis.text.x = element_text(size = 16, color = "grey"),
+    plot.title = element_markdown(size = 36, face = "bold"),
+    plot.subtitle = element_text(size = 24),
+    plot.margin = unit(c(0.5, 1.5, 0.5, 1.5), "cm"),
+    legend.position = "none"
+  ) +
+  labs(
+    x = "", y = "", 
+    title = glue::glue("Titans <span style='color:{team_colors[2]}'>Pass Frequency</span> under <span style='color:{team_colors[1]}'>Expected</span>, 2020")
+  )
 
 # A bar graph with positive and negative values where zero is the
 # total amount budgeted.
