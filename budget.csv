@@ -1,4 +1,4 @@
-﻿Date,Account,Category,Tags,Expense amount,Income amount,Currency,In main currency,Main currency,Description
+Date,Account,Category,Tags,Expense amount,Income amount,Currency,In main currency,Main currency,Description
 7/1/2023,Cash,Fun,,0.01,0,USD,0.01,USD,
 7/1/2023,Cash,Health insurance,,0.01,0,USD,0.01,USD,
 7/1/2023,Cash,Miscellaneous,,0.01,0,USD,0.01,USD,
@@ -76,7 +76,9 @@
 8/6/2023,Cash,Miscellaneous,Phone accessories,16.95,0,USD,16.95,USD,
 8/7/2023,Cash,Miscellaneous,furniture,52.14,0,USD,52.14,USD,
 8/7/2023,Cash,Fun,Orioles,62.6,0,USD,62.6,USD,
+8/8/2023,Cash,"Amazon, Spotify, and HBO",,21.09,0,USD,21.09,USD,
 8/9/2023,Cash,Miscellaneous,birthday,13.69,0,USD,13.69,USD,
+8/9/2023,Cash,Phone and internet,May phone,16.53,0,USD,16.53,USD,
 8/10/2023,Cash,Groceries,Safeway,82.68,0,USD,82.68,USD,
 8/10/2023,Cash,Groceries,Safeway,6.49,0,USD,6.49,USD,
 8/10/2023,Cash,Groceries,Aldi,70.92,0,USD,70.92,USD,
