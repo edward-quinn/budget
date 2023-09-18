@@ -30,13 +30,14 @@ df <- read_csv("budget.csv",
 
 months <- as.character(unique(df$month))
 
-# tester filtering
+budget <- tibble(
+  category = sort(unique(df$category)),
+  budget = c(
+    21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+  )
+)
 
-df |> 
-  filter(month == "August") |> 
-  group_by(category) |> 
-  summarise(total_expense = sum(expense_amount)) |> 
-  arrange(desc(total_expense))
+
 
 
 
@@ -109,16 +110,20 @@ server <- function(input, output, session) {
       # If "All Months" is selected, summarize expenses for all months
       df |>
         group_by(category) |>
-        summarise(Expenses = sum(expense_amount),
-                  Budgeted = c(
-                    21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
-                  ))
+        summarise(Expenses = sum(expense_amount)) |>
+        
+        # Pick up here - need to find a way to multiple by number of months
+        # total. The left join will work as is for a single month view
+        # only.
+                    left_join(budget, by = "category")
+        
     } else {
       # Otherwise, filter and summarize based on selected month(s)
       df |>
         filter(month %in% input$month) |>
         group_by(category) |>
-        summarise(Expenses = sum(expense_amount))
+        summarise(Expenses = sum(expense_amount)) |> 
+      left_join(budget, by = "category")
     }
   })
   
@@ -217,8 +222,5 @@ run_plot <- run_df |>
 
 # Add a scorecard with total spent, absolute and percentage amount over
 # or below 
-
-
-
 
 
