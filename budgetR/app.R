@@ -32,12 +32,14 @@ years <- as.character(unique(df$year))
 
 months <- as.character(unique(df$month))
 
+month_year <- unique(paste(df$year, df$month, sep = "_"))
+
 budget <- tibble(
   category = sort(unique(df$category)),
   monthly_budget = c(
     21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
   )) |> 
-  mutate(cumulative_budget = monthly_budget * monthly_budget) 
+  mutate(cumulative_budget = length(month_year) * monthly_budget) 
 
 
 
@@ -49,6 +51,8 @@ ui <- fluidPage(
   titlePanel("Medward Finance"),
   
   fluidRow(
+    column(2,
+           selectInput("year", "Year", choices = c("All Years", years))),
     column(2,
            selectInput("month", "Month", choices = c("All Months", months))
     )
@@ -71,19 +75,36 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   selected <- reactive({
-    if ("All Months" %in% input$month) {
+    
+    if ("All Years" %in% input$year &
+        "All Months" %in% input$month) {
       # If "All Months" is selected, summarize expenses for all months
       df |>
         group_by(category) |>
         summarise(Expenses = sum(expense_amount))
-    } else {
+      
+    } else if ("All Years" %in% input$year) {
       # Otherwise, filter and summarize based on selected month(s)
       df |>
         filter(month %in% input$month) |>
         group_by(category) |>
         summarise(Expenses = sum(expense_amount))
+      
+    } else if ("All Months" %in% input$month) {
+      # Otherwise, filter and summarize based on selected month(s)
+      df |>
+        filter(year %in% input$year) |>
+        group_by(category) |>
+        summarise(Expenses = sum(expense_amount))
+      
+    } else {
+      df |>
+        filter(year %in% input$year) |>
+        group_by(category) |>
+        summarise(Expenses = sum(expense_amount))
     }
-  })
+  }
+  )
   
   
   
@@ -107,27 +128,27 @@ server <- function(input, output, session) {
   
   
   # Data for bullet charts
-  bullet_df <- reactive({
-    if ("All Months" %in% input$month) {
-      # If "All Months" is selected, summarize expenses for all months
-      df |>
-        group_by(category) |>
-        summarise(Expenses = sum(expense_amount)) |>
-        
-        # Pick up here - need to find a way to multiple by number of months
-        # total. The left join will work as is for a single month view
-        # only.
-                    left_join(budget, by = "category")
-        
-    } else {
-      # Otherwise, filter and summarize based on selected month(s)
-      df |>
-        filter(month %in% input$month) |>
-        group_by(category) |>
-        summarise(Expenses = sum(expense_amount)) |> 
-      left_join(budget, by = "category")
-    }
-  })
+  # bullet_df <- reactive({
+  #   if ("All Months" %in% input$month) {
+  #     # If "All Months" is selected, summarize expenses for all months
+  #     df |>
+  #       group_by(category) |>
+  #       summarise(Expenses = sum(expense_amount)) |>
+  #       
+  #       # Pick up here - need to find a way to multiple by number of months
+  #       # total. The left join will work as is for a single month view
+  #       # only.
+  #                   left_join(budget, by = "category")
+  #       
+  #   } else {
+  #     # Otherwise, filter and summarize based on selected month(s)
+  #     df |>
+  #       filter(month %in% input$month) |>
+  #       group_by(category) |>
+  #       summarise(Expenses = sum(expense_amount)) |> 
+  #     left_join(budget, by = "category")
+  #   }
+  # })
   
   
   
