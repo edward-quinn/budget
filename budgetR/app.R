@@ -25,17 +25,19 @@ df <- read_csv("budget.csv",
   mutate(date = mdy(date),
          month = month(date,
                        label = TRUE,
-                       abbr = FALSE))
+                       abbr = FALSE),
+         year = year(date))
 
+years <- as.character(unique(df$year))
 
 months <- as.character(unique(df$month))
 
 budget <- tibble(
   category = sort(unique(df$category)),
-  budget = c(
+  monthly_budget = c(
     21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
-  )
-)
+  )) |> 
+  mutate(cumulative_budget = monthly_budget * monthly_budget) 
 
 
 
