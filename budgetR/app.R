@@ -100,6 +100,7 @@ server <- function(input, output, session) {
     } else {
       df |>
         filter(year %in% input$year) |>
+        filter(month %in% input$month) |> 
         group_by(category) |>
         summarise(Expenses = sum(expense_amount))
     }
