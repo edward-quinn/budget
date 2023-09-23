@@ -129,27 +129,27 @@ server <- function(input, output, session) {
   
   
   # Data for bullet charts
-  # bullet_df <- reactive({
-  #   if ("All Months" %in% input$month) {
-  #     # If "All Months" is selected, summarize expenses for all months
-  #     df |>
-  #       group_by(category) |>
-  #       summarise(Expenses = sum(expense_amount)) |>
-  #       
-  #       # Pick up here - need to find a way to multiple by number of months
-  #       # total. The left join will work as is for a single month view
-  #       # only.
-  #                   left_join(budget, by = "category")
-  #       
-  #   } else {
-  #     # Otherwise, filter and summarize based on selected month(s)
-  #     df |>
-  #       filter(month %in% input$month) |>
-  #       group_by(category) |>
-  #       summarise(Expenses = sum(expense_amount)) |> 
-  #     left_join(budget, by = "category")
-  #   }
-  # })
+  bullet_df <- reactive({
+    if ("All Months" %in% input$month) {
+      # If "All Months" is selected, summarize expenses for all months
+      df |>
+        group_by(category) |>
+        summarise(Expenses = sum(expense_amount)) |>
+
+        # Pick up here - need to find a way to multiple by number of months
+        # total. The left join will work as is for a single month view
+        # only.
+                    left_join(budget, by = "category")
+
+    } else {
+      # Otherwise, filter and summarize based on selected month(s)
+      df |>
+        filter(month %in% input$month) |>
+        group_by(category) |>
+        summarise(Expenses = sum(expense_amount)) |>
+      left_join(budget, by = "category")
+    }
+  })
   
   
   
@@ -174,12 +174,7 @@ shinyApp(ui, server)
 
 
 
-# Random ideas for additions:
 
-# Definitely need a break down of the miscellaneous category.
-
-# Projected spend for the year facet wrap plots by category, dashed lines
-# for months that have not yet occurred, solid lines for prior months.
 
 
 ##########################################################################
@@ -211,21 +206,25 @@ run_df <- tibble(
   mutate(
     category = factor(category),
     difference = actual - expected,
-    diff_color = if_else(difference < 0, "#DC143C", "black")
+    diff_color = if_else(difference < 0, "#DC143C", "black"),
+    label_position = if_else(actual < expected, 
+                             expected + 10,
+                             actual +10) 
   )
 
 run_plot <- run_df |> 
   ggplot(aes(x = actual, y = fct_rev(category))) +
   geom_text(
-    aes(x = 100, label = paste0(difference, "%"), color = diff_color), 
-    nudge_x = 10, hjust = 1, fontface= "bold", family = "Chivo", size = 10
-  ) +
-  geom_col(aes(x = 100), width = 0.7, color = "grey", alpha = 0.2) +
+    aes(x = label_position, label = abs(difference), color = diff_color),
+    nudge_x = 70, hjust = 1, fontface= "bold", family = "Chivo", size = 2) +
   geom_col(aes(x = expected), alpha = 0.5, width = 0.7) +
-  geom_col(width = 0.3) + 
-  scale_fill_identity() +
-  scale_x_continuous(breaks = c(25, 50, 75), labels = scales::percent_format(scale = 1)) +
-  theme_minimal() 
+  geom_col(width = 0.3) +
+  theme_classic() +
+  ylab("Category") +
+  xlab("Spending")
+  # scale_fill_identity()
+  # scale_x_continuous(breaks = c(25, 50, 75), labels = scales::percent_format(scale = 1)) +
+  # theme_minimal() 
   # theme(
   #   text = element_text(family = "Chivo"),
   #   panel.grid.major.y = element_blank(),
@@ -241,6 +240,13 @@ run_plot <- run_df |>
   # ) +
   # labs(x="",y="")
 
+
+# Random ideas for additions:
+
+# Definitely need a break down of the miscellaneous category.
+
+# Projected spend for the year facet wrap plots by category, dashed lines
+# for months that have not yet occurred, solid lines for prior months.
 # A bar graph with positive and negative values where zero is the
 # total amount budgeted.
 
