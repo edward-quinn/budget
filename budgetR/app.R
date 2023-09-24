@@ -81,45 +81,100 @@ server <- function(input, output, session) {
       # If "All Months" is selected, summarize expenses for all months
       df |>
         group_by(category) |>
-        summarise(Expenses = sum(expense_amount))
+        summarise(expenses = sum(expense_amount),
+                  expected_cost_multiplier = length(
+                    unique(
+                      paste0(year,month)))) |> 
+        mutate(
+          category = factor(category),
+          expected = c(
+            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+          )* expected_cost_multiplier,
+          difference = expenses - expected,
+          label_position = if_else(expenses < expected, 
+                                   expected + 10,
+                                   expenses + 10)
+        )
       
     } else if ("All Years" %in% input$year) {
       # Otherwise, filter and summarize based on selected month(s)
       df |>
         filter(month %in% input$month) |>
         group_by(category) |>
-        summarise(Expenses = sum(expense_amount))
+        summarise(expenses = sum(expense_amount),
+                  expected_cost_multiplier = length(
+                    unique(
+                      paste0(year,month)))) |> 
+        mutate(
+          category = factor(category),
+          expected = c(
+            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+          )* expected_cost_multiplier,
+          difference = expenses - expected,
+          label_position = if_else(expenses < expected, 
+                                   expected + 10,
+                                   expenses + 10)
+          
+        )
       
     } else if ("All Months" %in% input$month) {
       # Otherwise, filter and summarize based on selected month(s)
       df |>
         filter(year %in% input$year) |>
         group_by(category) |>
-        summarise(Expenses = sum(expense_amount))
+        summarise(expenses = sum(expense_amount),
+                  expected_cost_multiplier = length(
+                    unique(
+                      paste0(year,month)))) |> 
+        mutate(
+          category = factor(category),
+          expected = c(
+            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+          )* expected_cost_multiplier,
+          difference = expenses - expected,
+          label_position = if_else(expenses < expected, 
+                                   expected + 10,
+                                   expenses + 10)
+        )
       
     } else {
       df |>
         filter(year %in% input$year) |>
-        filter(month %in% input$month) |> 
+        filter(month %in% input$month) |>
         group_by(category) |>
-        summarise(Expenses = sum(expense_amount))
+        summarise(expenses = sum(expense_amount),
+                  expected_cost_multiplier = length(
+                    unique(
+                      paste0(year,month)))) |> 
+        mutate(
+          category = factor(category),
+          expected = c(
+            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+          ) * expected_cost_multiplier,
+          difference = expenses - expected,
+          label_position = if_else(expenses < expected, 
+                                   expected + 10,
+                                   expenses + 10)
+        )
     }
   }
+  
   )
   
   
   
   # expenses_plotted column chart
   output$expenses_plotted <- renderPlot({
+    
     selected() |>
-      ggplot(aes(x = fct_reorder(category, Expenses), y = Expenses,
-                 fill = fct_reorder(category, Expenses))) +
+      ggplot(aes(x = fct_reorder(category, expenses), y = expenses,
+                 fill = fct_reorder(category, expenses))) +
       geom_col() +
       theme_minimal() +
       scale_fill_viridis(discrete = TRUE, guide = "none") +
       xlab("Spending Category") +
       ylab("Cost") +
-      geom_text(aes(label = glue::glue("${round(Expenses)}")), 
+      geom_text(aes(label = glue::glue("${round(expenses)}")), 
                 hjust = -0.1, 
                 colour = "black",
                 size = 2.5,
@@ -128,39 +183,30 @@ server <- function(input, output, session) {
   }, res = 96)
   
   
-  # Data for bullet charts
-  bullet_df <- reactive({
-    if ("All Months" %in% input$month) {
-      # If "All Months" is selected, summarize expenses for all months
-      df |>
-        group_by(category) |>
-        summarise(Expenses = sum(expense_amount)) |>
-
-        # Pick up here - need to find a way to multiple by number of months
-        # total. The left join will work as is for a single month view
-        # only.
-                    left_join(budget, by = "category")
-
-    } else {
-      # Otherwise, filter and summarize based on selected month(s)
-      df |>
-        filter(month %in% input$month) |>
-        group_by(category) |>
-        summarise(Expenses = sum(expense_amount)) |>
-      left_join(budget, by = "category")
-    }
-  })
   
+  ##########################################################################
+  # Current total spend and budgeted total spend bullet graphs by category.
+  ##########################################################################
   
   
   # bullet charts
   output$bullet <- renderPlot({
     
+    selected() |> 
+      ggplot(aes(x = expenses, y = fct_reorder(category, expenses))) +
+      geom_text(
+        aes(x = label_position, 
+          label = glue::glue("${round(abs(difference))}")),
+          hjust = -0.175, 
+          fontface= "bold", 
+          size = 2.5) +
+      geom_col(aes(x = expected), alpha = 0.5, width = 0.7) +
+      geom_col(width = 0.3) +
+      theme_classic() +
+      ylab("Category") +
+      xlab("Spending")
     
-    
-  })
-    
-  
+  }, res = 96)
 }
 
 # Run App
@@ -177,68 +223,10 @@ shinyApp(ui, server)
 
 
 
-##########################################################################
-# Current total spend and budgeted total spend bullet graphs by category.
-##########################################################################
 
-# approximated data
-run_df <- tibble(
-  category = c(
-    "Amazon, Spotify, and HBO",
-    "Dining Out",
-    "Fun",
-    "Gas",
-    "Groceries",
-    "Gym",
-    "Health Insurance",
-    "Home & Utilities",
-    "Miscellaneous",
-    "Phone and internet",
-    "Rent"
-  ),
-  actual = c(
-    38, 57, 63, 36, 89, 50, 39, 41, 54, 80, 90
-  ),
-  expected = c(
-    21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
-  )
-) |> 
-  mutate(
-    category = factor(category),
-    difference = actual - expected,
-    diff_color = if_else(difference < 0, "#DC143C", "black"),
-    label_position = if_else(actual < expected, 
-                             expected + 10,
-                             actual +10) 
-  )
 
-run_plot <- run_df |> 
-  ggplot(aes(x = actual, y = fct_rev(category))) +
-  geom_text(
-    aes(x = label_position, label = abs(difference), color = diff_color),
-    nudge_x = 70, hjust = 1, fontface= "bold", family = "Chivo", size = 2) +
-  geom_col(aes(x = expected), alpha = 0.5, width = 0.7) +
-  geom_col(width = 0.3) +
-  theme_classic() +
-  ylab("Category") +
-  xlab("Spending")
-  # scale_fill_identity()
-  # scale_x_continuous(breaks = c(25, 50, 75), labels = scales::percent_format(scale = 1)) +
-  # theme_minimal() 
-  # theme(
-  #   text = element_text(family = "Chivo"),
-  #   panel.grid.major.y = element_blank(),
-  #   panel.grid.minor = element_blank(),
-  #   panel.grid.major.x = element_line(color = "grey", size = 0.2),
-  #   panel.ontop = TRUE,
-  #   #axis.text.y = element_markdown(size = 14, margin = margin(r = -25, unit = "pt")),
-  #   axis.text.x = element_text(size = 16, color = "grey"),
-  #   #plot.title = element_markdown(size = 36, face = "bold"),
-  #   plot.subtitle = element_text(size = 24),
-  #   plot.margin = unit(c(0.5, 1.5, 0.5, 1.5), "cm"),
-  #   legend.position = "none"
-  # ) +
-  # labs(x="",y="")
+
+
 
 
 # Random ideas for additions:
@@ -252,5 +240,12 @@ run_plot <- run_df |>
 
 # Add a scorecard with total spent, absolute and percentage amount over
 # or below 
+
+
+
+
+
+
+
 
 
