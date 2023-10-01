@@ -59,7 +59,10 @@ ui <- fluidPage(
   ),
   
   fluidRow(
-    column(6, plotOutput("expenses_plotted"))
+    column(8, 
+           plotOutput("expenses_plotted")),
+    column(4,
+           dataTableOutput("misc"))
   ),
   
   fluidRow(
@@ -207,7 +210,62 @@ server <- function(input, output, session) {
       xlab("Spending")
     
   }, res = 96)
+
+########################################
+# Miscellaneous Expenses Table
+########################################
+  
+  misc_df <- reactive({
+    
+    if ("All Years" %in% input$year &
+        "All Months" %in% input$month) {
+      # If "All Months" is selected, summarize expenses for all months
+      df |>
+        filter(category == "Miscellaneous") |> 
+        group_by(tags) |>
+        summarise(expenses = sum(expense_amount)) |> 
+        arrange(desc(expenses))
+        
+      
+    } else if ("All Years" %in% input$year) {
+      # Otherwise, filter and summarize based on selected month(s)
+      df |>
+        filter(month %in% input$month) |>
+        filter(category == "Miscellaneous") |> 
+        group_by(tags) |>
+        summarise(expenses = sum(expense_amount)) |> 
+        arrange(desc(expenses))
+      
+    } else if ("All Months" %in% input$month) {
+      # Otherwise, filter and summarize based on selected month(s)
+      df |>
+        filter(year %in% input$year) |>
+        filter(category == "Miscellaneous") |> 
+        group_by(tags) |>
+        summarise(expenses = sum(expense_amount)) |> 
+        arrange(desc(expenses))
+      
+    } else {
+      df |>
+        filter(year %in% input$year) |>
+        filter(month %in% input$month) |>
+        filter(category == "Miscellaneous") |> 
+        group_by(tags) |>
+        summarise(expenses = sum(expense_amount)) |> 
+        arrange(desc(expenses))
+    }
+  }
+  
+  )
+
+  output$misc <- renderDataTable(
+
+    misc_df(), options = list(pageLength = 5)
+    
+  )
+
 }
+
 
 # Run App
 shinyApp(ui, server)
@@ -231,15 +289,14 @@ shinyApp(ui, server)
 
 # Random ideas for additions:
 
-# Definitely need a break down of the miscellaneous category.
-
 # Projected spend for the year facet wrap plots by category, dashed lines
 # for months that have not yet occurred, solid lines for prior months.
 # A bar graph with positive and negative values where zero is the
 # total amount budgeted.
 
 # Add a scorecard with total spent, absolute and percentage amount over
-# or below 
+# or below. This will probably be easiest if I switch to using cards in 
+# bslib.
 
 
 
