@@ -37,7 +37,7 @@ month_year <- unique(paste(df$year, df$month, sep = "_"))
 budget <- tibble(
   category = sort(unique(df$category)),
   monthly_budget = c(
-    21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+    200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250, 22.22 
   )) |> 
   mutate(cumulative_budget = length(month_year) * monthly_budget) 
 
@@ -91,7 +91,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+            200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250, 22.22 
           )* expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
@@ -111,7 +111,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+            200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250, 22.22 
           )* expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
@@ -132,7 +132,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+            200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250, 22.22 
           )* expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
@@ -152,7 +152,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            21.09, 200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250 
+            200, 150, 60, 500, 153, 216.18, 70, 300, 142.44, 1250, 22.22
           ) * expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
