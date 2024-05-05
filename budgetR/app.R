@@ -28,7 +28,7 @@ df <- read_csv("budget.csv",
                        abbr = FALSE),
          year = year(date)) |> 
   # Remove expenses related to wedding and honeymoon here
-  filter(!(tags %in% c("Wedding","Honeymoon","Engagement")))
+  filter(!(tags %in% c("Wedding","Honeymoon","Engagement","Immigration")))
 
 years <- as.character(unique(df$year))
 
@@ -39,7 +39,7 @@ month_year <- unique(paste(df$year, df$month, sep = "_"))
 budget <- tibble(
   category = sort(unique(df$category)),
   monthly_budget = c(
-    200, 150, 60, 500, 56, 290.30, 70, 300, 158.53, 1250, 17.89 
+    200, 150, 60, 500, 56, 290.30, 70, 500, 158.53, 1250, 17.89 
   )) |> 
   mutate(cumulative_budget = length(month_year) * monthly_budget) 
 
@@ -93,7 +93,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            200, 150, 60, 500, 56, 290.30, 70, 300, 158.53, 1250, 17.89  
+            200, 150, 60, 500, 56, 290.30, 70, 500, 158.53, 1250, 17.89  
           )* expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
@@ -113,7 +113,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            200, 150, 60, 500, 56, 290.30, 70, 300, 158.53, 1250, 17.89  
+            200, 150, 60, 500, 56, 290.30, 70, 500, 158.53, 1250, 17.89  
           )* expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
@@ -134,7 +134,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            200, 150, 60, 500, 56, 290.30, 70, 300, 158.53, 1250, 17.89  
+            200, 150, 60, 500, 56, 290.30, 70, 500, 158.53, 1250, 17.89  
           )* expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
@@ -154,7 +154,7 @@ server <- function(input, output, session) {
         mutate(
           category = factor(category),
           expected = c(
-            200, 150, 60, 500, 56, 290.30, 70, 300, 158.53, 1250, 17.89 
+            200, 150, 60, 500, 56, 290.30, 70, 500, 158.53, 1250, 17.89 
           ) * expected_cost_multiplier,
           difference = expenses - expected,
           label_position = if_else(expenses < expected, 
